@@ -1,41 +1,39 @@
-import React, {useEffect, useState} from 'react';
-import {
-  Button,
-  FlatList,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import React from 'react';
+import {Button, StyleSheet, Text, TextInput, View} from 'react-native';
 import {useFireproof} from '../../src/index';
 import TodoItem from './TodoItem';
 
-export type Todo = { text: string; date: number; completed: boolean; };
-export type TodoFromAllDocs = { key: string; value: Todo; };
+export type Todo = {
+  text: string;
+  date: number;
+  completed: boolean;
+  _id?: string;
+};
+export type TodoFromAllDocs = {key: string; value: Todo};
 
 const TodoList = () => {
-  const { database: db, useDocument, useLiveQuery } = useFireproof('TodoDB');
+  const {database, useDocument, useLiveQuery} = useFireproof('TodoDB-3');
 
   const defaultTodo: Todo = {
     text: '',
     date: Date.now(),
     completed: false,
   };
-  const [todo, setTodo, saveTodo] = useDocument<Todo>(() => (defaultTodo));
+  const [todo, setTodo, saveTodo] = useDocument<Todo>(() => defaultTodo);
 
   // // ============
   // // db.allDocs()
   // // ============
 
   // const [todos, setTodos] = useState<TodoFromAllDocs[]>([])
-  // const getDocs = async () => {
-  //   const { rows } = await db.allDocs<Todo>();
-  //   setTodos(rows);
-  // }
-
-  // useEffect(() => {
-  //   getDocs()
-  // }, []);
+//   const getDocs = async () => {
+//     const { rows } = await db.allDocs<Todo>();
+//     console.log(">>>>>", rows)
+//   }
+//
+//   React.useEffect(() => {
+//     getDocs()
+//   }, []);
 
   // const returnChangeData = false;
   // db.subscribe((changes) => {
@@ -47,38 +45,49 @@ const TodoList = () => {
   //   }
   // }, returnChangeData);
 
-
   // ============
   // useLiveQuery
   // ============
 
-  const todos: Todo[] = useLiveQuery<Todo>('date', {limit: 10, descending: true}).docs;
-  console.log({todos});
+  const todos: Todo[] = useLiveQuery<Todo>('date', {
+    limit: 10,
+    descending: true,
+  }).docs;
+  console.log(todos);
 
   return (
     <View style={styles.container}>
       <View>
         <TextInput
           placeholder="new todo"
-          onChangeText={(text) => setTodo({text} as Todo)}
+          onChangeText={text => {
+            console.log('setTodo', {text});
+            setTodo({text} as Todo);
+          }}
           value={todo.text}
         />
         <Button
           title="Add Todo"
           onPress={() => {
-            saveTodo();
+            console.log('saveTodo', defaultTodo);
+            saveTodo()
+              .then(() => {
+                delete defaultTodo._id;
+                setTodo(defaultTodo);
+                console.log('saveTodo.then', {todo});
+              })
+              .catch(console.error);
             setTodo(defaultTodo);
           }}
         />
       </View>
       <View>
         <Text>Todo List:</Text>
-        {
-          todos.map((todo, i) => (
+        {todos.map(
+          (todo, i) =>
             // @ts-expect-error `Property '_deleted' does not exist on type 'Doc<Todo>'.`
-            !(todo?.value._deleted) && <TodoItem key={i} item={todo} />
-          ))
-        }
+            !todo?.value._deleted && <TodoItem key={i} item={todo} />,
+        )}
 
         {/* for some reason, this is throwing the React Hooks error.  Maybe useMemo() in useFireproof? */}
         {/* <FlatList<TodoFromAllDocs>

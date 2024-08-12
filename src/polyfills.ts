@@ -3,7 +3,7 @@ import { polyfillGlobal } from './PolyfillFunctions';
 import 'react-native-url-polyfill/auto';
 
 // React-Native polyfills for Fireproof
-const log = (polyfill: string) => {
+function log(polyfill: string) {
   console.info(`@fireproof/react-native polyfill: ${polyfill}`);
 };
 

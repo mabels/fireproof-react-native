@@ -2,7 +2,7 @@
  * @format
  */
 
-import '../src/polyfills.tsx';
+import '../src/polyfills.ts';
 
 import {AppRegistry} from 'react-native';
 import App from './src/App';

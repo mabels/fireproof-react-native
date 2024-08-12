@@ -1,18 +1,18 @@
-import React, { useState } from "react";
-import { Button, StyleSheet, Text, TextInput, View } from "react-native";
+import React, {useState} from 'react';
+import {Button, StyleSheet, Text, TextInput, View} from 'react-native';
 import Checkbox from '@react-native-community/checkbox';
-import { useFireproof } from "../../src/index";
-import { Todo, TodoFromAllDocs } from "./TodoList";
+import {useFireproof} from '../../src/index';
+import {Todo, TodoFromAllDocs} from './TodoList';
 // import { Doc } from "@fireproof/core";
 
 type TodoItemProps = {
-  item: TodoFromAllDocs;
-}
+  readonly item: TodoFromAllDocs;
+};
 const TodoItem = ({item}: TodoItemProps) => {
   if (!item) {
     return null;
   }
-  const { database: db, useDocument } = useFireproof('TodoDB', {public: true});
+  const {database: db, useDocument} = useFireproof('TodoDB-3', {public: true});
   const [todo, setTodo, saveTodo] = useDocument<Todo>(() => item.value);
   const [editMode, setEditMode] = useState<boolean>(false);
   const textStyle = todo.completed ? styles.completed : styles.notCompleted;
@@ -21,29 +21,27 @@ const TodoItem = ({item}: TodoItemProps) => {
     <View style={styles.itemRow}>
       <Checkbox
         value={todo.completed}
-        onValueChange={async (completed) => {
+        onValueChange={async completed => {
           await saveTodo({...todo, completed});
           setTodo();
         }}
         style={styles.checkbox}
       />
-      {
-        editMode ? (
-          <TextInput
-            style={textStyle}
-            value={todo.text}
-            onChangeText={(text) => setTodo({...todo, text})}
-            onSubmitEditing={() => {
-              saveTodo();
-              setEditMode(false)
-            }}
-          />
-        ) : (
-          <Text style={textStyle} onPress={() => setEditMode(true)}>
-            {todo.text}
-          </Text>
-        )
-      }
+      {editMode ? (
+        <TextInput
+          style={textStyle}
+          value={todo.text}
+          onChangeText={text => setTodo({...todo, text})}
+          onSubmitEditing={() => {
+            saveTodo();
+            setEditMode(false);
+          }}
+        />
+      ) : (
+        <Text style={textStyle} onPress={() => setEditMode(true)}>
+          {todo.text}
+        </Text>
+      )}
       <Button
         title="X"
         color="red"
@@ -64,7 +62,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   checkbox: {
-    transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }],
+    transform: [{scaleX: 0.8}, {scaleY: 0.8}],
   },
   completed: {
     flex: 1,
